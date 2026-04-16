@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Roam Wild — Go Further</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{--ember:#E8531A;--ember-dark:#C43D0E;--ember-light:#FBE9E2;--night:#1A1A18;--forest:#2E4A35;--trail:#4E9A6A;--sand:#F5EDD8;--canvas:#F9F7F3;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--canvas);color:var(--night);}
+#app{display:flex;flex-direction:column;height:100vh;}
+#topbar{background:#fff;border-bottom:1px solid rgba(26,26,24,0.1);padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:1000;}
+#logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+#logo-icon{width:34px;height:34px;background:var(--ember);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#logo-word{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--night);letter-spacing:1px;}
+#search-wrap{flex:1;position:relative;}
+#search{width:100%;padding:8px 12px 8px 34px;border:1px solid rgba(26,26,24,0.12);border-radius:10px;background:var(--canvas);font-size:13px;color:var(--night);outline:none;font-family:'DM Sans',sans-serif;}
+#search:focus{border-color:var(--ember);background:#fff;}
+.sico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:#aaa;pointer-events:none;}
+#gps-btn{padding:8px 12px;border:1px solid rgba(26,26,24,0.12);border-radius:9px;background:#fff;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--night);font-family:'DM Sans',sans-serif;}
+#gps-btn:hover{border-color:var(--ember);color:var(--ember);}
+#stats-bar{background:var(--night);padding:6px 16px;display:flex;gap:20px;overflow-x:auto;}
+#stats-bar::-webkit-scrollbar{display:none;}
+.stat-item{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--ember);}
+.stat-label{font-size:10px;color:rgba(255,255,255,0.5);}
+#filter-row{background:#fff;border-bottom:1px solid rgba(26,26,24,0.08);padding:8px 14px;display:flex;gap:6px;overflow-x:auto;z-index:999;}
+#filter-row::-webkit-scrollbar{display:none;}
+.chip{padding:5px 12px;border-radius:20px;font-size:11px;border:1px solid rgba(26,26,24,0.1);background:#fff;color:#666;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.chip:hover{border-color:var(--ember);color:var(--ember);}
+.chip.active{background:var(--ember-light);border-color:var(--ember);color:var(--ember-dark);font-weight:500;}
+.chip.known-active{background:#FAEEDA;border-color:#BA7517;color:#633806;font-weight:500;}
+#main{display:flex;flex:1;overflow:hidden;}
+#map{flex:1;z-index:1;}
+#sidebar{width:320px;background:#fff;border-left:1px solid rgba(26,26,24,0.08);display:flex;flex-direction:column;overflow:hidden;}
+#sidebar-head{padding:12px 14px;border-bottom:1px solid rgba(26,26,24,0.08);}
+#sidebar-head .title{font-size:14px;font-weight:500;color:var(--night);}
+#sidebar-count{font-size:10px;color:#888;margin-top:2px;font-family:'DM Mono',monospace;}
+#list{flex:1;overflow-y:auto;}
+#list::-webkit-scrollbar{width:3px;}
+#list::-webkit-scrollbar-thumb{background:rgba(26,26,24,0.1);border-radius:2px;}
+.scard{padding:11px 14px;border-bottom:1px solid rgba(26,26,24,0.06);cursor:pointer;transition:background 0.1s;}
+.scard:hover,.scard.sel{background:var(--canvas);}
+.scard.sel{border-left:2px solid var(--ember);}
+.sc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:2px;}
+.sc-name{font-size:12px;font-weight:500;color:var(--night);}
+.sc-loc{font-size:10px;color:#888;margin-bottom:4px;}
+.sc-badges{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:3px;}
+.bdg{font-size:9px;padding:2px 6px;border-radius:6px;font-weight:500;}
+.bdg-free{background:#E1F5EE;color:#085041;}.bdg-paid{background:#E6F1FB;color:#185FA5;}
+.bdg-known{background:#FAEEDA;color:#854F0B;}
+.sc-stars{font-size:10px;color:#888;}
+.star{color:#EF9F27;}
+.conf-mini{display:flex;align-items:center;gap:4px;margin-top:2px;}
+.conf-track{flex:1;height:3px;background:rgba(26,26,24,0.08);border-radius:2px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:2px;}
+#detail{display:none;position:absolute;bottom:16px;left:16px;width:295px;background:#fff;border-radius:14px;border:1px solid rgba(26,26,24,0.1);padding:14px;z-index:2000;box-shadow:0 4px 24px rgba(0,0,0,0.12);}
+#detail.show{display:block;}
+#det-img{height:80px;border-radius:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:30px;}
+#det-name{font-size:14px;font-weight:500;color:var(--night);margin-bottom:2px;}
+#det-loc{font-size:11px;color:#888;margin-bottom:6px;}
+#det-badges{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px;}
+#det-stars{font-size:10px;color:#888;margin-bottom:5px;}
+#det-desc{font-size:11px;color:#666;line-height:1.6;margin-bottom:5px;}
+#det-why{font-size:10px;color:#666;background:var(--canvas);border-radius:6px;padding:5px 8px;font-style:italic;margin-bottom:5px;display:none;}
+#det-tip{font-size:10px;color:#085041;background:#E1F5EE;border-radius:6px;padding:5px 8px;margin-bottom:8px;display:none;}
+.det-btns{display:flex;gap:6px;}
+.det-dir{flex:1;padding:7px;background:var(--ember);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.det-save{padding:7px 10px;border:1px solid rgba(26,26,24,0.12);background:#fff;color:var(--night);border-radius:8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.det-close{padding:7px 10px;border:1px solid rgba(26,26,24,0.12);background:#fff;color:#888;border-radius:8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+#legend{position:absolute;top:12px;right:12px;background:#fff;border:1px solid rgba(26,26,24,0.1);border-radius:10px;padding:8px 12px;z-index:1000;font-size:10px;}
+.leg{display:flex;align-items:center;gap:6px;margin-bottom:3px;color:#666;}
+.leg:last-child{margin-bottom:0;}
+.leg-dot{width:9px;height:9px;border-radius:50%;}
+.loading-overlay{position:absolute;inset:0;background:rgba(249,247,243,0.95);display:flex;align-items:center;justify-content:center;z-index:5000;flex-direction:column;gap:12px;}
+.loading-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--ember);letter-spacing:2px;}
+.loading-sub{font-size:13px;color:#888;}
+.spinner{width:32px;height:32px;border:3px solid rgba(232,83,26,0.2);border-top-color:var(--ember);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.db-badge{background:#E1F5EE;color:#085041;font-size:9px;padding:2px 6px;border-radius:6px;font-weight:500;margin-left:6px;}
+.error-msg{font-size:11px;color:#E8531A;background:#FBE9E2;padding:8px 12px;border-radius:8px;max-width:280px;text-align:center;}
+@media(max-width:640px){#sidebar{display:none;}#detail{width:calc(100% - 32px);}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <a id="logo" href="#">
+      <div id="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+          <path d="M3 16 Q8 8 11 12 Q14 8 19 4" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="19" cy="4" r="2.5" fill="white"/>
+          <circle cx="3" cy="16" r="1.8" fill="white" opacity="0.6"/>
+        </svg>
+      </div>
+      <span id="logo-word">Roam Wild</span>
+    </a>
+    <div id="search-wrap">
+      <span class="sico">⌕</span>
+      <input id="search" type="text" placeholder="Search spots, activities, countries..."/>
+    </div>
+    <button id="gps-btn" onclick="findMe()">⊙ Near me</button>
+  </div>
+  <div id="stats-bar"></div>
+  <div id="filter-row">
+    <div class="chip active" data-f="all">All</div>
+    <div class="chip" data-f="gold">💛 Gold</div>
+    <div class="chip" data-f="fossicking">💎 Fossicking</div>
+    <div class="chip" data-f="fishing">🎣 Fishing</div>
+    <div class="chip" data-f="mtb">🚵 MTB</div>
+    <div class="chip" data-f="snowboard">🏂 Snow</div>
+    <div class="chip" data-f="hiking">🥾 Hiking</div>
+    <div class="chip" data-f="climbing">🧗 Climbing</div>
+    <div class="chip" data-f="kayak">🛶 Kayak</div>
+    <div class="chip" data-f="surfing">🏄 Surfing</div>
+    <div class="chip" data-f="skydiving">🪂 Skydiving</div>
+    <div class="chip" data-f="basejump">🦅 BASE</div>
+    <div class="chip" data-f="discgolf">🥏 Disc Golf</div>
+    <div class="chip" data-f="4wd">🚙 4WD</div>
+    <div class="chip" data-f="camping">⛺ Camping</div>
+    <div class="chip" data-f="swimming">🏊 Swimming</div>
+    <div class="chip" data-f="lookout">🏔️ Lookouts</div>
+    <div class="chip" data-f="wellness">🧘 Wellness</div>
+    <div class="chip" data-f="foraging">🍄 Foraging</div>
+    <div class="chip" data-f="gym">💪 Gyms</div>
+    <div class="chip" data-f="known">⭐ Known spots</div>
+    <div class="chip" data-f="free">🆓 Free only</div>
+    <div class="chip" data-f="australia">🇦🇺 Australia</div>
+  </div>
+  <div id="main">
+    <div id="map"></div>
+    <div id="sidebar">
+      <div id="sidebar-head">
+        <div class="title">Roam Wild <span class="db-badge">● LIVE</span></div>
+        <div id="sidebar-count">Loading...</div>
+      </div>
+      <div id="list"></div>
+    </div>
+  </div>
+</div>
+<div id="detail">
+  <div id="det-img"></div>
+  <div id="det-name"></div>
+  <div id="det-loc"></div>
+  <div id="det-badges"></div>
+  <div id="det-stars"></div>
+  <div id="det-desc"></div>
+  <div id="det-why"></div>
+  <div id="det-tip"></div>
+  <div class="det-btns">
+    <button class="det-dir" id="det-dir-btn">Get directions</button>
+    <button class="det-save" onclick="saveSpot()">♡ Save</button>
+    <button class="det-close" onclick="closeDetail()">✕</button>
+  </div>
+</div>
+<div id="legend">
+  <div class="leg"><div class="leg-dot" style="background:#BA7517;"></div>Gold / Gems</div>
+  <div class="leg"><div class="leg-dot" style="background:#185FA5;"></div>Fishing</div>
+  <div class="leg"><div class="leg-dot" style="background:#4E9A6A;"></div>Hiking / MTB</div>
+  <div class="leg"><div class="leg-dot" style="background:#7F77DD;"></div>Snow / Climb</div>
+  <div class="leg"><div class="leg-dot" style="background:#378ADD;"></div>Kayak / Surf</div>
+  <div class="leg"><div class="leg-dot" style="background:#E24B4A;"></div>Sky / BASE</div>
+  <div class="leg"><div class="leg-dot" style="background:#EF9F27;"></div>Lookouts</div>
+  <div class="leg"><div class="leg-dot" style="background:#D4537E;"></div>Wellness / Gym</div>
+  <div class="leg"><div class="leg-dot" style="background:#639922;"></div>Foraging</div>
+</div>
+<div class="loading-overlay" id="loading">
+  <div class="loading-logo">Roam Wild</div>
+  <div class="spinner"></div>
+  <div class="loading-sub" id="loading-sub">Connecting to database...</div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const SUPABASE_URL = 'https://zqkujliskbvexoxtnjxv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_59Hfw2WiI2UQlIeiYu-XTw_-d2T5UOa';
+
+const CAT_COLOR={camping:"#E8531A",fishing:"#185FA5",fossicking:"#7F77DD",gold:"#BA7517",discgolf:"#D4537E",mtb:"#4E9A6A",snowboard:"#7F77DD",kayak:"#378ADD",hiking:"#4E9A6A","4wd":"#BA7517",climbing:"#7F77DD",swimming:"#5DCAA5",skydiving:"#E24B4A",basejump:"#E24B4A",surfing:"#378ADD",lookout:"#EF9F27",wellness:"#D4537E",foraging:"#639922",gym:"#185FA5"};
+const CAT_EMOJI={camping:"⛺",fishing:"🎣",fossicking:"💎",gold:"💛",discgolf:"🥏",mtb:"🚵",snowboard:"🏂",kayak:"🛶",hiking:"🥾","4wd":"🚙",climbing:"🧗",swimming:"🏊",skydiving:"🪂",basejump:"🦅",surfing:"🏄",lookout:"🏔️",wellness:"🧘",foraging:"🍄",gym:"💪"};
+const CAT_BG={camping:"#FBE9E2",fishing:"#E6F1FB",fossicking:"#EEEDFE",gold:"#FAEEDA",discgolf:"#FBEAF0",mtb:"#EAF3DE",snowboard:"#EEEDFE",kayak:"#E6F1FB",hiking:"#EAF3DE","4wd":"#FAEEDA",climbing:"#FBEAF0",swimming:"#E1F5EE",skydiving:"#FCEBEB",basejump:"#FCEBEB",surfing:"#E6F1FB",lookout:"#FAEEDA",wellness:"#FBEAF0",foraging:"#EAF3DE",gym:"#E6F1FB"};
+
+let map, markers={}, activeFilter="all", selectedId=null, SPOTS=[];
+
+// ============================================================
+// LOAD FROM SUPABASE — using fetch directly (no SDK needed)
+// ============================================================
+async function loadSpots(){
+  try {
+    document.getElementById('loading-sub').textContent = 'Loading spots...';
+    
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/spots?approved=eq.true&order=name&limit=1000`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if(!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    
+    const data = await res.json();
+    
+    if(!data || data.length === 0) throw new Error('No spots returned');
+
+    SPOTS = data.map(s => ({
+      id: s.id,
+      name: s.name,
+      loc: [s.region, s.country].filter(Boolean).join(', '),
+      cat: s.category,
+      lat: parseFloat(s.latitude),
+      lng: parseFloat(s.longitude),
+      type: s.type || 'free',
+      rating: parseFloat(s.rating) || 4.5,
+      reviews: parseInt(s.review_count) || 0,
+      desc: s.description || '',
+      why: s.geological_why || '',
+      tip: s.insider_tip || '',
+      known: s.is_known_spot || false,
+      confidence: s.confidence_pct,
+      knownTag: s.known_tag || '',
+      country: s.country || '',
+      region: s.region || ''
+    }));
+
+    console.log(`✅ Loaded ${SPOTS.length} spots`);
+    document.getElementById('loading').style.display = 'none';
+    initMap();
+    updateStats();
+    renderList();
+
+  } catch(err) {
+    console.error('Load error:', err);
+    document.getElementById('loading-sub').textContent = '';
+    document.getElementById('loading').innerHTML = `
+      <div class="loading-logo">Roam Wild</div>
+      <div class="error-msg">⚠️ Could not connect to database.<br>${err.message}<br><br>Check console for details.</div>
+    `;
+  }
+}
+
+// ============================================================
+// MAP
+// ============================================================
+function initMap(){
+  map = L.map("map",{zoomControl:true}).setView([-27,134],4);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom:19
+  }).addTo(map);
+  SPOTS.forEach(s=>{
+    if(!s.lat || !s.lng || s.lat===0) return;
+    const m = L.marker([s.lat,s.lng],{icon:makeIcon(s,false)}).addTo(map);
+    m.on("click",()=>selectSpot(s.id));
+    markers[s.id]=m;
+  });
+}
+
+function pinColor(s){
+  return CAT_COLOR[s.cat]||"#E8531A";
+}
+
+function makeIcon(s,sel){
+  const c=pinColor(s);const sz=sel?44:32;const em=CAT_EMOJI[s.cat]||"📍";
+  return L.divIcon({className:"",html:`<div style="width:${sz}px;height:${sz}px;background:${c};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+    <span style="transform:rotate(45deg);font-size:${sel?17:11}px;line-height:1;">${em}</span>
+    ${s.known?`<div style="position:absolute;top:-4px;right:-4px;width:11px;height:11px;background:#EF9F27;border-radius:50%;border:1.5px solid white;transform:rotate(45deg);"></div>`:""}
+  </div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz]});
+}
+
+// ============================================================
+// FILTER & RENDER
+// ============================================================
+function filtered(){
+  const q=document.getElementById("search").value.toLowerCase();
+  const cats=["gold","fishing","fossicking","discgolf","mtb","snowboard","kayak","hiking","4wd","climbing","swimming","camping","skydiving","basejump","surfing","lookout","wellness","foraging","gym"];
+  return SPOTS.filter(s=>{
+    if(!s.lat||s.lat===0)return false;
+    if(activeFilter==="free"&&s.type!=="free")return false;
+    if(activeFilter==="known"&&!s.known)return false;
+    if(activeFilter==="australia"&&s.country!=="AU")return false;
+    if(cats.includes(activeFilter)&&s.cat!==activeFilter)return false;
+    if(q&&![s.name,s.loc,s.cat,s.desc,s.tip].join(' ').toLowerCase().includes(q))return false;
+    return true;
+  });
+}
+
+function updateStats(){
+  const bar=document.getElementById("stats-bar");
+  const cats={};
+  SPOTS.forEach(s=>{cats[s.cat]=(cats[s.cat]||0)+1;});
+  bar.innerHTML=`
+    <div class="stat-item"><span class="stat-num">${SPOTS.length}</span><span class="stat-label">live spots</span></div>
+    <div class="stat-item"><span class="stat-num">${cats.gold||0}</span><span class="stat-label">💛 gold</span></div>
+    <div class="stat-item"><span class="stat-num">${cats.surfing||0}</span><span class="stat-label">🏄 surf</span></div>
+    <div class="stat-item"><span class="stat-num">${cats.hiking||0}</span><span class="stat-label">🥾 hiking</span></div>
+    <div class="stat-item"><span class="stat-num">${cats.mtb||0}</span><span class="stat-label">🚵 MTB</span></div>
+    <div class="stat-item"><span class="stat-num">${cats.skydiving||0}</span><span class="stat-label">🪂 skydive</span></div>
+    <div class="stat-item"><span class="stat-num">${cats.wellness||0}</span><span class="stat-label">🧘 wellness</span></div>
+    <div class="stat-item"><span class="stat-num">${cats.foraging||0}</span><span class="stat-label">🍄 foraging</span></div>
+    <div class="stat-item"><span class="stat-num">${cats.lookout||0}</span><span class="stat-label">🏔️ lookouts</span></div>
+  `;
+}
+
+function renderMarkers(){
+  const fs=new Set(filtered().map(s=>s.id));
+  SPOTS.forEach(s=>{
+    if(!markers[s.id])return;
+    if(fs.has(s.id)){markers[s.id].setIcon(makeIcon(s,s.id===selectedId));markers[s.id].addTo(map);}
+    else map.removeLayer(markers[s.id]);
+  });
+}
+
+function renderList(){
+  const fs=filtered();
+  document.getElementById("sidebar-count").textContent=`${fs.length} of ${SPOTS.length} spots · live`;
+  const list=document.getElementById("list");
+  list.innerHTML="";
+  fs.forEach(s=>{
+    const d=document.createElement("div");
+    d.className="scard"+(s.id===selectedId?" sel":"");
+    const stars=[1,2,3,4,5].map(i=>`<span class="star">${i<=Math.round(s.rating||4)?"★":"☆"}</span>`).join("");
+    const confBar=s.known&&s.confidence?`<div class="conf-mini"><span style="font-size:9px;color:#888;">Confidence</span><div class="conf-track"><div class="conf-fill" style="width:${s.confidence}%;background:${s.confidence>=90?"#1D9E75":"#EF9F27"};"></div></div><span style="font-size:9px;font-weight:500;color:${s.confidence>=90?"#1D9E75":"#EF9F27"};">${s.confidence}%</span></div>`:"";
+    d.innerHTML=`
+      <div class="sc-top"><div class="sc-name">${CAT_EMOJI[s.cat]||"📍"} ${s.name}</div><span class="bdg ${s.type==="free"?"bdg-free":"bdg-paid"}">${s.type==="free"?"Free":"Paid"}</span></div>
+      <div class="sc-loc">${s.loc}</div>
+      <div class="sc-badges">${s.known?`<span class="bdg bdg-known">⭐ Known spot</span>`:""}</div>
+      <div class="sc-stars">${stars} ${(s.rating||4).toFixed(1)} (${s.reviews||0})</div>
+      ${confBar}
+    `;
+    d.onclick=()=>selectSpot(s.id);
+    list.appendChild(d);
+  });
+}
+
+function selectSpot(id){
+  selectedId=id;
+  const s=SPOTS.find(x=>x.id===id);if(!s)return;
+  map.setView([s.lat,s.lng],9,{animate:true});
+  document.getElementById("det-img").style.background=CAT_BG[s.cat]||"#FBE9E2";
+  document.getElementById("det-img").innerHTML=`<span style="font-size:32px;">${CAT_EMOJI[s.cat]||"📍"}</span>`;
+  document.getElementById("det-name").textContent=s.name;
+  document.getElementById("det-loc").textContent=s.loc;
+  let bdgs=`<span class="bdg ${s.type==="free"?"bdg-free":"bdg-paid"}">${s.type==="free"?"Free":"Paid"}</span>`;
+  if(s.known)bdgs+=`<span class="bdg bdg-known">⭐ Known spot</span>`;
+  document.getElementById("det-badges").innerHTML=bdgs;
+  const rat=s.rating||4;
+  document.getElementById("det-stars").innerHTML=[1,2,3,4,5].map(i=>`<span class="star">${i<=Math.round(rat)?"★":"☆"}</span>`).join("")+` ${rat.toFixed(1)} (${s.reviews||0} reviews)`+(s.confidence?` · <span style="color:${s.confidence>=90?"#1D9E75":"#EF9F27"};">Confidence: ${s.confidence}%</span>`:"");
+  document.getElementById("det-desc").textContent=s.desc||"";
+  const whyEl=document.getElementById("det-why");
+  if(s.why){whyEl.textContent="🔬 Why here: "+s.why;whyEl.style.display="block";}else whyEl.style.display="none";
+  const tipEl=document.getElementById("det-tip");
+  if(s.tip){tipEl.textContent="💡 Insider tip: "+s.tip;tipEl.style.display="block";}else tipEl.style.display="none";
+  document.getElementById("det-dir-btn").onclick=()=>window.open(`https://www.openstreetmap.org/directions?to=${s.lat},${s.lng}`,"_blank");
+  document.getElementById("detail").classList.add("show");
+  renderMarkers();renderList();
+  document.querySelector(".scard.sel")?.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+function closeDetail(){selectedId=null;document.getElementById("detail").classList.remove("show");renderMarkers();renderList();}
+function saveSpot(){const b=document.querySelector(".det-save");b.textContent="♥ Saved!";b.style.color="var(--ember)";setTimeout(()=>{b.textContent="♡ Save";b.style.color="";},2000);}
+function findMe(){
+  const btn=document.getElementById("gps-btn");btn.textContent="Locating...";
+  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{
+    map.setView([p.coords.latitude,p.coords.longitude],9,{animate:true});
+    L.circleMarker([p.coords.latitude,p.coords.longitude],{radius:8,color:"var(--ember)",fillColor:"var(--ember)",fillOpacity:0.4,weight:2}).addTo(map).bindPopup("You are here").openPopup();
+    btn.textContent="⊙ Near me";
+  },()=>{btn.textContent="⊙ Near me";});}else btn.textContent="⊙ Near me";
+}
+
+document.querySelectorAll(".chip").forEach(c=>{
+  c.addEventListener("click",()=>{
+    document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active","known-active"));
+    c.classList.add(c.dataset.f==="known"?"known-active":"active");
+    activeFilter=c.dataset.f;renderMarkers();renderList();
+  });
+});
+document.getElementById("search").addEventListener("input",()=>{renderMarkers();renderList();});
+
+// BOOT
+loadSpots();
+</script>
+</body>
+</html>

@@ -21,6 +21,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--canvas);color:var(--night
 .sico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:#aaa;pointer-events:none;}
 #gps-btn{padding:8px 12px;border:1px solid rgba(26,26,24,0.12);border-radius:9px;background:#fff;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--night);font-family:'DM Sans',sans-serif;}
 #gps-btn:hover{border-color:var(--ember);color:var(--ember);}
+#auth-btn{padding:8px 14px;border:none;border-radius:9px;background:var(--ember);color:#fff;font-size:12px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;font-weight:500;}
+#auth-btn:hover{background:var(--ember-dark);}
 #stats-bar{background:var(--night);padding:6px 16px;display:flex;gap:20px;overflow-x:auto;}
 #stats-bar::-webkit-scrollbar{display:none;}
 .stat-item{display:flex;align-items:center;gap:6px;white-space:nowrap;}
@@ -104,6 +106,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--canvas);color:var(--night
       <input id="search" type="text" placeholder="Search spots, activities, countries..."/>
     </div>
     <button id="gps-btn" onclick="findMe()">⊙ Near me</button>
+    <button id="auth-btn" onclick="window.location.href='https://roam-wild-beta.vercel.app/auth'">Sign In</button>
   </div>
   <div id="stats-bar"></div>
   <div id="filter-row">
@@ -181,7 +184,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--canvas);color:var(--night
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const SUPABASE_URL = 'https://zqkujliskbvexoxtnjxv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_59Hfw2WiI2UQlIeiYu-XTw_-d2T5UOa';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxa3VqbGlza2J2ZXhveHRuanh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNjc1ODksImV4cCI6MjA5MTg0MzU4OX0.m8c50IQBVsPFLOFFRDEbhiZWy6nVGSI0qK-DWhqMmdI';
 
 const CAT_COLOR={camping:"#E8531A",fishing:"#185FA5",fossicking:"#7F77DD",gold:"#BA7517",discgolf:"#D4537E",mtb:"#4E9A6A",snowboard:"#7F77DD",kayak:"#378ADD",hiking:"#4E9A6A","4wd":"#BA7517",climbing:"#7F77DD",swimming:"#5DCAA5",skydiving:"#E24B4A",basejump:"#E24B4A",surfing:"#378ADD",lookout:"#EF9F27",wellness:"#D4537E",foraging:"#639922",gym:"#185FA5"};
 const CAT_EMOJI={camping:"⛺",fishing:"🎣",fossicking:"💎",gold:"💛",discgolf:"🥏",mtb:"🚵",snowboard:"🏂",kayak:"🛶",hiking:"🥾","4wd":"🚙",climbing:"🧗",swimming:"🏊",skydiving:"🪂",basejump:"🦅",surfing:"🏄",lookout:"🏔️",wellness:"🧘",foraging:"🍄",gym:"💪"};
@@ -397,8 +400,22 @@ function toggleLegend(){
   l.style.display = l.style.display === 'none' ? 'block' : 'none';
 }
 
+// CHECK LOGIN STATE
+function checkAuth(){
+  const user = localStorage.getItem('rw_user');
+  if(user){
+    try {
+      const u = JSON.parse(user);
+      const name = u.user_metadata?.username || u.email.split('@')[0];
+      document.getElementById('auth-btn').textContent = '👤 ' + name;
+      document.getElementById('auth-btn').onclick = ()=>window.location.href='https://roam-wild-beta.vercel.app/auth';
+    } catch(e){}
+  }
+}
+
 // BOOT
 loadSpots();
+checkAuth();
 </script>
 </body>
 </html>

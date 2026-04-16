@@ -106,7 +106,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--canvas);color:var(--night
       <input id="search" type="text" placeholder="Search spots, activities, countries..."/>
     </div>
     <button id="gps-btn" onclick="findMe()">⊙ Near me</button>
-    <button id="auth-btn" onclick="window.location.href='https://roam-wild-beta.vercel.app/auth'">Sign In</button>
+    <button id="auth-btn" onclick="window.location.href='/auth'">Sign In</button>
   </div>
   <div id="stats-bar"></div>
   <div id="filter-row">
@@ -408,7 +408,7 @@ function checkAuth(){
       const u = JSON.parse(user);
       const name = u.user_metadata?.username || u.email.split('@')[0];
       document.getElementById('auth-btn').textContent = '👤 ' + name;
-      document.getElementById('auth-btn').onclick = ()=>window.location.href='https://roam-wild-beta.vercel.app/auth';
+      document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
     } catch(e){}
   }
 }

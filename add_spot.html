@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Roam Wild — Add a Spot</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{--ember:#E8531A;--ember-dark:#C43D0E;--ember-light:#FBE9E2;--night:#1A1A18;--canvas:#F9F7F3;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--canvas);color:var(--night);min-height:100vh;}
+header{background:#fff;border-bottom:1px solid rgba(26,26,24,0.1);padding:12px 20px;display:flex;align-items:center;gap:12px;}
+.logo-icon{width:34px;height:34px;background:var(--ember);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-word{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--night);letter-spacing:1px;}
+.back-btn{margin-left:auto;padding:7px 14px;border:1px solid rgba(26,26,24,0.12);border-radius:8px;background:#fff;font-size:12px;cursor:pointer;color:var(--night);font-family:'DM Sans',sans-serif;text-decoration:none;}
+.container{max-width:680px;margin:0 auto;padding:24px 20px 60px;}
+h1{font-size:22px;font-weight:500;margin-bottom:4px;}
+.subtitle{font-size:13px;color:#888;margin-bottom:28px;}
+.step-indicator{display:flex;gap:6px;margin-bottom:28px;}
+.step{flex:1;height:3px;border-radius:2px;background:rgba(26,26,24,0.1);}
+.step.done{background:var(--ember);}
+.step.active{background:var(--ember);opacity:0.4;}
+.section{background:#fff;border-radius:14px;padding:20px;margin-bottom:16px;border:1px solid rgba(26,26,24,0.06);}
+.section-title{font-size:13px;font-weight:500;color:var(--night);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.section-title span{font-size:16px;}
+.form-group{margin-bottom:14px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+label{display:block;font-size:11px;font-weight:500;color:#888;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+input,select,textarea{width:100%;padding:10px 13px;border:1px solid rgba(26,26,24,0.12);border-radius:10px;font-size:13px;color:var(--night);font-family:'DM Sans',sans-serif;outline:none;background:var(--canvas);}
+input:focus,select:focus,textarea:focus{border-color:var(--ember);background:#fff;}
+textarea{resize:vertical;min-height:80px;}
+select{cursor:pointer;}
+#map-pick{height:220px;border-radius:10px;border:1px solid rgba(26,26,24,0.12);overflow:hidden;margin-bottom:10px;}
+.coords-row{display:flex;gap:8px;align-items:center;}
+.coords-row input{flex:1;}
+.locate-btn{padding:10px 14px;background:var(--canvas);border:1px solid rgba(26,26,24,0.12);border-radius:10px;font-size:12px;cursor:pointer;white-space:nowrap;color:var(--night);font-family:'DM Sans',sans-serif;}
+.locate-btn:hover{border-color:var(--ember);color:var(--ember);}
+.map-hint{font-size:11px;color:#888;margin-bottom:10px;}
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.cat-btn{padding:10px 6px;border:1px solid rgba(26,26,24,0.1);border-radius:10px;background:#fff;cursor:pointer;text-align:center;font-size:10px;color:#666;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.cat-btn:hover{border-color:var(--ember);color:var(--ember);}
+.cat-btn.active{background:var(--ember-light);border-color:var(--ember);color:var(--ember-dark);font-weight:500;}
+.cat-btn .icon{font-size:20px;display:block;margin-bottom:4px;}
+.rating-row{display:flex;gap:8px;}
+.star-btn{font-size:24px;cursor:pointer;color:#ddd;transition:color 0.1s;background:none;border:none;padding:0;}
+.star-btn.active{color:#EF9F27;}
+.type-toggle{display:flex;gap:0;background:var(--canvas);border-radius:10px;padding:3px;}
+.type-btn{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:500;cursor:pointer;border-radius:8px;border:none;background:none;color:#888;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.type-btn.active{background:#fff;color:var(--night);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.char-count{font-size:10px;color:#aaa;text-align:right;margin-top:3px;}
+.submit-btn{width:100%;padding:14px;background:var(--ember);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;transition:background 0.15s;}
+.submit-btn:hover{background:var(--ember-dark);}
+.submit-btn:disabled{background:#ccc;cursor:not-allowed;}
+.msg{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;}
+.msg.error{background:#FCEBEB;color:#C43D0E;display:block;}
+.msg.success{background:#E1F5EE;color:#085041;display:block;}
+.success-screen{display:none;text-align:center;padding:40px 20px;}
+.success-icon{font-size:60px;margin-bottom:16px;}
+.success-title{font-size:22px;font-weight:500;margin-bottom:8px;}
+.success-sub{font-size:13px;color:#888;margin-bottom:28px;}
+.success-btn{display:inline-block;padding:12px 28px;background:var(--ember);color:#fff;border-radius:10px;text-decoration:none;font-weight:500;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;}
+.tip-box{background:#E1F5EE;border-radius:8px;padding:10px 13px;font-size:11px;color:#085041;margin-top:8px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-icon">
+    <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+      <path d="M3 16 Q8 8 11 12 Q14 8 19 4" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="19" cy="4" r="2.5" fill="white"/>
+      <circle cx="3" cy="16" r="1.8" fill="white" opacity="0.6"/>
+    </svg>
+  </div>
+  <span class="logo-word">Roam Wild</span>
+  <a href="/" class="back-btn">← Back to map</a>
+</header>
+
+<div class="container">
+  <div id="msg" class="msg"></div>
+
+  <!-- FORM -->
+  <div id="form-view">
+    <h1>Add a spot 📍</h1>
+    <p class="subtitle">Share your knowledge with the Roam Wild community</p>
+
+    <div class="step-indicator">
+      <div class="step done" id="s1"></div>
+      <div class="step" id="s2"></div>
+      <div class="step" id="s3"></div>
+      <div class="step" id="s4"></div>
+    </div>
+
+    <!-- CATEGORY -->
+    <div class="section">
+      <div class="section-title"><span>🏷️</span> What type of spot is it?</div>
+      <div class="cat-grid">
+        <button class="cat-btn" data-cat="gold" onclick="selectCat(this)"><span class="icon">💛</span>Gold</button>
+        <button class="cat-btn" data-cat="fossicking" onclick="selectCat(this)"><span class="icon">💎</span>Fossicking</button>
+        <button class="cat-btn" data-cat="fishing" onclick="selectCat(this)"><span class="icon">🎣</span>Fishing</button>
+        <button class="cat-btn" data-cat="hiking" onclick="selectCat(this)"><span class="icon">🥾</span>Hiking</button>
+        <button class="cat-btn" data-cat="mtb" onclick="selectCat(this)"><span class="icon">🚵</span>MTB</button>
+        <button class="cat-btn" data-cat="surfing" onclick="selectCat(this)"><span class="icon">🏄</span>Surfing</button>
+        <button class="cat-btn" data-cat="climbing" onclick="selectCat(this)"><span class="icon">🧗</span>Climbing</button>
+        <button class="cat-btn" data-cat="kayak" onclick="selectCat(this)"><span class="icon">🛶</span>Kayak</button>
+        <button class="cat-btn" data-cat="snowboard" onclick="selectCat(this)"><span class="icon">🏂</span>Snow</button>
+        <button class="cat-btn" data-cat="skydiving" onclick="selectCat(this)"><span class="icon">🪂</span>Skydiving</button>
+        <button class="cat-btn" data-cat="camping" onclick="selectCat(this)"><span class="icon">⛺</span>Camping</button>
+        <button class="cat-btn" data-cat="swimming" onclick="selectCat(this)"><span class="icon">🏊</span>Swimming</button>
+        <button class="cat-btn" data-cat="4wd" onclick="selectCat(this)"><span class="icon">🚙</span>4WD</button>
+        <button class="cat-btn" data-cat="discgolf" onclick="selectCat(this)"><span class="icon">🥏</span>Disc Golf</button>
+        <button class="cat-btn" data-cat="lookout" onclick="selectCat(this)"><span class="icon">🏔️</span>Lookout</button>
+        <button class="cat-btn" data-cat="wellness" onclick="selectCat(this)"><span class="icon">🧘</span>Wellness</button>
+        <button class="cat-btn" data-cat="foraging" onclick="selectCat(this)"><span class="icon">🍄</span>Foraging</button>
+        <button class="cat-btn" data-cat="gym" onclick="selectCat(this)"><span class="icon">💪</span>Gym</button>
+      </div>
+    </div>
+
+    <!-- BASIC INFO -->
+    <div class="section">
+      <div class="section-title"><span>📝</span> Basic info</div>
+      <div class="form-group">
+        <label>Spot name *</label>
+        <input type="text" id="f-name" placeholder="e.g. Hidden Creek Gold Run" maxlength="80" oninput="updateChar('f-name','name-count',80)"/>
+        <div class="char-count"><span id="name-count">0</span>/80</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Country *</label>
+          <select id="f-country">
+            <option value="">Select country</option>
+            <option value="AU">🇦🇺 Australia</option>
+            <option value="NZ">🇳🇿 New Zealand</option>
+            <option value="US">🇺🇸 United States</option>
+            <option value="CA">🇨🇦 Canada</option>
+            <option value="GB">🇬🇧 United Kingdom</option>
+            <option value="JP">🇯🇵 Japan</option>
+            <option value="FR">🇫🇷 France</option>
+            <option value="ZA">🇿🇦 South Africa</option>
+            <option value="ID">🇮🇩 Indonesia</option>
+            <option value="PT">🇵🇹 Portugal</option>
+            <option value="ES">🇪🇸 Spain</option>
+            <option value="NO">🇳🇴 Norway</option>
+            <option value="IS">🇮🇸 Iceland</option>
+            <option value="CL">🇨🇱 Chile</option>
+            <option value="OTHER">🌍 Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Region / State</label>
+          <input type="text" id="f-region" placeholder="e.g. NSW, Victoria"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Access type</label>
+        <div class="type-toggle">
+          <button class="type-btn active" id="type-free" onclick="setType('free')">🆓 Free</button>
+          <button class="type-btn" id="type-paid" onclick="setType('paid')">💳 Paid / Permit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCATION -->
+    <div class="section">
+      <div class="section-title"><span>📍</span> Location</div>
+      <p class="map-hint">Tap the map to drop a pin, or use your current location</p>
+      <div id="map-pick"></div>
+      <div class="coords-row">
+        <div>
+          <label>Latitude</label>
+          <input type="number" id="f-lat" placeholder="-33.8688" step="0.0001"/>
+        </div>
+        <div>
+          <label>Longitude</label>
+          <input type="number" id="f-lng" placeholder="151.2093" step="0.0001"/>
+        </div>
+        <button class="locate-btn" onclick="useMyLocation()">⊙ Use my location</button>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="section">
+      <div class="section-title"><span>📖</span> Tell us about it</div>
+      <div class="form-group">
+        <label>Description *</label>
+        <textarea id="f-desc" placeholder="What makes this spot special? What can people expect to find or experience here?" maxlength="500" oninput="updateChar('f-desc','desc-count',500)"></textarea>
+        <div class="char-count"><span id="desc-count">0</span>/500</div>
+      </div>
+      <div class="form-group">
+        <label>Insider tip 💡</label>
+        <textarea id="f-tip" placeholder="Best time to visit, what to bring, local knowledge, access notes..." maxlength="300" oninput="updateChar('f-tip','tip-count',300)"></textarea>
+        <div class="char-count"><span id="tip-count">0</span>/300</div>
+        <div class="tip-box">💡 Insider tips are the most valued part of Roam Wild. Share what you know!</div>
+      </div>
+      <div class="form-group">
+        <label>Your rating</label>
+        <div class="rating-row" id="star-row">
+          <button class="star-btn" data-v="1" onclick="setRating(1)">★</button>
+          <button class="star-btn" data-v="2" onclick="setRating(2)">★</button>
+          <button class="star-btn" data-v="3" onclick="setRating(3)">★</button>
+          <button class="star-btn" data-v="4" onclick="setRating(4)">★</button>
+          <button class="star-btn" data-v="5" onclick="setRating(5)">★</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="submitSpot()" id="submit-btn">Submit spot →</button>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div id="success-view" class="success-screen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Spot submitted!</div>
+    <div class="success-sub">Thanks for contributing to Roam Wild. Your spot will be reviewed and added to the map shortly. The community thanks you! 🙌</div>
+    <button class="success-btn" onclick="window.location.href='/'">Back to map</button>
+    <br><br>
+    <button class="success-btn" style="background:#fff;color:var(--ember);border:1px solid var(--ember);" onclick="resetForm()">Add another spot</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const SUPABASE_URL = 'https://zqkujliskbvexoxtnjxv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxa3VqbGlza2J2ZXhveHRuanh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNjc1ODksImV4cCI6MjA5MTg0MzU4OX0.m8c50IQBVsPFLOFFRDEbhiZWy6nVGSI0qK-DWhqMmdI';
+
+let selectedCat = '';
+let selectedType = 'free';
+let selectedRating = 0;
+let pinMarker = null;
+let pickMap = null;
+
+// Init map
+window.addEventListener('load', ()=>{
+  pickMap = L.map('map-pick',{zoomControl:true}).setView([-27,134],4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(pickMap);
+  
+  pickMap.on('click', e=>{
+    setPin(e.latlng.lat, e.latlng.lng);
+  });
+
+  // Check if user is logged in
+  const user = localStorage.getItem('rw_user');
+  if(!user){
+    showMsg('You need to be signed in to add a spot. <a href="/auth" style="color:var(--ember)">Sign in here</a>', 'error');
+  }
+});
+
+function setPin(lat, lng){
+  if(pinMarker) pickMap.removeLayer(pinMarker);
+  pinMarker = L.marker([lat,lng]).addTo(pickMap);
+  document.getElementById('f-lat').value = lat.toFixed(5);
+  document.getElementById('f-lng').value = lng.toFixed(5);
+  updateSteps();
+}
+
+function useMyLocation(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(p=>{
+      const lat = p.coords.latitude;
+      const lng = p.coords.longitude;
+      pickMap.setView([lat,lng],12);
+      setPin(lat,lng);
+    });
+  }
+}
+
+function selectCat(btn){
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedCat = btn.dataset.cat;
+  updateSteps();
+}
+
+function setType(t){
+  selectedType = t;
+  document.getElementById('type-free').className = 'type-btn' + (t==='free'?' active':'');
+  document.getElementById('type-paid').className = 'type-btn' + (t==='paid'?' active':'');
+}
+
+function setRating(v){
+  selectedRating = v;
+  document.querySelectorAll('.star-btn').forEach(b=>{
+    b.classList.toggle('active', parseInt(b.dataset.v) <= v);
+  });
+}
+
+function updateChar(inputId, countId, max){
+  const len = document.getElementById(inputId).value.length;
+  document.getElementById(countId).textContent = len;
+}
+
+function updateSteps(){
+  const cat = selectedCat;
+  const lat = document.getElementById('f-lat').value;
+  const name = document.getElementById('f-name').value;
+  document.getElementById('s1').className = 'step done';
+  document.getElementById('s2').className = 'step ' + (cat?'done':'');
+  document.getElementById('s3').className = 'step ' + (lat?'done':'');
+  document.getElementById('s4').className = 'step ' + (name?'done':'');
+}
+
+function showMsg(html, type='error'){
+  const el = document.getElementById('msg');
+  el.innerHTML = html;
+  el.className = `msg ${type}`;
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function hideMsg(){
+  document.getElementById('msg').className = 'msg';
+}
+
+async function submitSpot(){
+  // Validate
+  const name = document.getElementById('f-name').value.trim();
+  const country = document.getElementById('f-country').value;
+  const region = document.getElementById('f-region').value.trim();
+  const lat = parseFloat(document.getElementById('f-lat').value);
+  const lng = parseFloat(document.getElementById('f-lng').value);
+  const desc = document.getElementById('f-desc').value.trim();
+  const tip = document.getElementById('f-tip').value.trim();
+
+  if(!selectedCat){ showMsg('Please select a category'); return; }
+  if(!name){ showMsg('Please enter a spot name'); return; }
+  if(!country){ showMsg('Please select a country'); return; }
+  if(!lat || !lng){ showMsg('Please drop a pin on the map or use your location'); return; }
+  if(!desc){ showMsg('Please add a description'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  try {
+    const token = localStorage.getItem('rw_token');
+    const headers = {
+      'apikey': SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    };
+    if(token) headers['Authorization'] = `Bearer ${token}`;
+
+    const spot = {
+      name,
+      description: desc,
+      category: selectedCat,
+      latitude: lat,
+      longitude: lng,
+      country,
+      region: region || country,
+      type: selectedType,
+      rating: selectedRating || 4.0,
+      review_count: 0,
+      is_known_spot: false,
+      insider_tip: tip,
+      approved: false  // needs review before going live
+    };
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/spots`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(spot)
+    });
+
+    if(!res.ok){
+      const err = await res.json();
+      throw new Error(err.message || 'Failed to submit');
+    }
+
+    // Show success
+    document.getElementById('form-view').style.display = 'none';
+    document.getElementById('success-view').style.display = 'block';
+
+  } catch(err){
+    showMsg('Error: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Submit spot →';
+  }
+}
+
+function resetForm(){
+  document.getElementById('form-view').style.display = 'block';
+  document.getElementById('success-view').style.display = 'none';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-desc').value = '';
+  document.getElementById('f-tip').value = '';
+  document.getElementById('f-lat').value = '';
+  document.getElementById('f-lng').value = '';
+  selectedCat = '';
+  selectedRating = 0;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active'));
+  if(pinMarker){ pickMap.removeLayer(pinMarker); pinMarker=null; }
+  hideMsg();
+}
+
+document.getElementById('f-name').addEventListener('input', updateSteps);
+</script>
+</body>
+</html>

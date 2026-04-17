@@ -55,6 +55,7 @@ select{cursor:pointer;}
 .msg{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:16px;display:none;}
 .msg.error{background:#FCEBEB;color:#C43D0E;display:block;}
 .msg.success{background:#E1F5EE;color:#085041;display:block;}
+.msg.info{background:#E6F1FB;color:#185FA5;display:block;}
 .success-screen{display:none;text-align:center;padding:40px 20px;}
 .success-icon{font-size:60px;margin-bottom:16px;}
 .success-title{font-size:22px;font-weight:500;margin-bottom:8px;}
@@ -238,10 +239,22 @@ window.addEventListener('load', ()=>{
     setPin(e.latlng.lat, e.latlng.lng);
   });
 
-  // Check if user is logged in
-  const user = localStorage.getItem('rw_user');
-  if(!user){
-    showMsg('You need to be signed in to add a spot. <a href="/auth" style="color:var(--ember)">Sign in here</a>', 'error');
+  // Check login state - clear expired tokens
+  const token = localStorage.getItem('rw_token');
+  if(token){
+    // Check if token is expired by decoding JWT
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if(payload.exp * 1000 < Date.now()){
+        // Token expired - clear it
+        localStorage.removeItem('rw_token');
+        localStorage.removeItem('rw_user');
+        showMsg('Your session expired. <a href="/auth" style="color:var(--ember);font-weight:500;">Sign back in</a> or continue as guest (spot will be reviewed before going live).', 'info');
+      }
+    } catch(e){
+      localStorage.removeItem('rw_token');
+      localStorage.removeItem('rw_user');
+    }
   }
 });
 
@@ -331,13 +344,13 @@ async function submitSpot(){
   btn.textContent = 'Submitting...';
 
   try {
-    const token = localStorage.getItem('rw_token');
+    // Use anon key - spots submitted as unapproved, reviewed before going live
     const headers = {
       'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
       'Content-Type': 'application/json',
       'Prefer': 'return=minimal'
     };
-    if(token) headers['Authorization'] = `Bearer ${token}`;
 
     const spot = {
       name,

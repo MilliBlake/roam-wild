@@ -173,7 +173,7 @@ async function signIn(){
     localStorage.setItem('rw_token', data.access_token);
     localStorage.setItem('rw_user', JSON.stringify(data.user));
     showMsg('Signed in! Welcome back 🎉', 'success');
-    setTimeout(()=>showUserPanel(data.user), 800);
+    setTimeout(()=>{ window.location.href = '/'; }, 800);
   } catch(err){
     showMsg(err.message);
   } finally {
@@ -224,7 +224,7 @@ async function signUp(){
       localStorage.setItem('rw_token', data.access_token);
       localStorage.setItem('rw_user', JSON.stringify(data.user));
       showMsg('Account created! Welcome to Roam Wild 🎉', 'success');
-      setTimeout(()=>showUserPanel(data.user, username), 800);
+      setTimeout(()=>{ window.location.href = '/'; }, 800);
     }
   } catch(err){
     showMsg(err.message);

@@ -222,9 +222,11 @@ async function signUp(){
       });
       
       localStorage.setItem('rw_token', data.access_token);
+      localStorage.setItem('rw_refresh', data.refresh_token || '');
       localStorage.setItem('rw_user', JSON.stringify(data.user));
+      localStorage.setItem('rw_username', username);
       showMsg('Account created! Welcome to Roam Wild 🎉', 'success');
-      setTimeout(()=>{ window.location.href = '/'; }, 800);
+      setTimeout(()=>{ window.location.href = '/'; }, 1000);
     }
   } catch(err){
     showMsg(err.message);

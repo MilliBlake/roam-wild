@@ -403,15 +403,28 @@ function toggleLegend(){
 
 // CHECK LOGIN STATE
 function checkAuth(){
-  const user = localStorage.getItem('rw_user');
-  if(user){
+  const username = localStorage.getItem('rw_username');
+  const token = localStorage.getItem('rw_token');
+  if(username && token){
     try {
-      const u = JSON.parse(user);
-      const name = u.user_metadata?.username || u.email.split('@')[0];
-      document.getElementById('auth-btn').textContent = '👤 ' + name;
-      document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
+      // Check token not expired
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if(payload.exp * 1000 > Date.now()){
+        document.getElementById('auth-btn').textContent = '👤 ' + username;
+        document.getElementById('auth-btn').style.background = 'var(--ember)';
+        document.getElementById('auth-btn').style.color = '#fff';
+        document.getElementById('auth-btn').style.border = 'none';
+        document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
+        return;
+      }
     } catch(e){}
+    // Token expired - clear
+    localStorage.removeItem('rw_token');
+    localStorage.removeItem('rw_user');
+    localStorage.removeItem('rw_username');
   }
+  document.getElementById('auth-btn').textContent = 'Sign In';
+  document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
 }
 
 // BOOT

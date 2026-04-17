@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Roam Wild</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--ember:#E8531A;--ember-dark:#C43D0E;--ember-light:#FBE9E2;--night:#1A1A18;--canvas:#F9F7F3;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--night);color:#fff;min-height:100vh;overflow-x:hidden;}
+
+/* ONBOARDING */
+#onboarding{position:fixed;inset:0;background:var(--night);z-index:9000;display:flex;flex-direction:column;}
+.ob-slides{flex:1;position:relative;overflow:hidden;}
+.ob-slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;opacity:0;transform:translateX(100%);transition:all 0.4s ease;}
+.ob-slide.active{opacity:1;transform:translateX(0);}
+.ob-slide.prev{opacity:0;transform:translateX(-100%);}
+.ob-emoji{font-size:80px;margin-bottom:24px;}
+.ob-title{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;text-align:center;margin-bottom:12px;color:#fff;}
+.ob-sub{font-size:15px;color:rgba(255,255,255,0.6);text-align:center;line-height:1.6;max-width:280px;}
+.ob-bottom{padding:32px;display:flex;flex-direction:column;gap:16px;align-items:center;}
+.ob-dots{display:flex;gap:8px;}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);transition:all 0.2s;}
+.ob-dot.active{background:var(--ember);width:24px;border-radius:4px;}
+.ob-next{width:100%;max-width:320px;padding:16px;background:var(--ember);border:none;border-radius:14px;font-size:16px;font-weight:500;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.ob-skip{font-size:13px;color:rgba(255,255,255,0.35);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;}
+.ob-skip:hover{color:rgba(255,255,255,0.6);}
+
+/* HOME SCREEN */
+#home{display:none;min-height:100vh;background:var(--canvas);}
+.home-header{background:var(--night);padding:20px 20px 28px;position:relative;overflow:hidden;}
+.home-header::after{content:'';position:absolute;bottom:-20px;left:0;right:0;height:40px;background:var(--canvas);border-radius:20px 20px 0 0;}
+.hh-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.logo-row{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:36px;height:36px;background:var(--ember);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.logo-word{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:#fff;}
+.profile-btn{width:36px;height:36px;border-radius:50%;background:var(--ember);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:500;color:#fff;}
+.greeting{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;}
+.greeting-name{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:#fff;margin-bottom:16px;}
+.search-bar{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.08);border-radius:12px;padding:11px 14px;cursor:pointer;}
+.search-bar span{font-size:13px;color:rgba(255,255,255,0.4);}
+.home-body{padding:24px 20px 100px;}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.section-title{font-size:15px;font-weight:500;color:var(--night);}
+.section-link{font-size:12px;color:var(--ember);}
+/* FEATURED CARDS */
+.featured-scroll{display:flex;gap:12px;overflow-x:auto;margin:0 -20px;padding:0 20px 4px;}
+.featured-scroll::-webkit-scrollbar{display:none;}
+.feat-card{min-width:200px;height:130px;border-radius:14px;position:relative;overflow:hidden;cursor:pointer;flex-shrink:0;}
+.feat-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:50px;}
+.feat-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 60%);}
+.feat-content{position:absolute;bottom:0;left:0;right:0;padding:12px;}
+.feat-name{font-size:13px;font-weight:500;color:#fff;}
+.feat-loc{font-size:10px;color:rgba(255,255,255,0.7);}
+.feat-badge{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.4);border-radius:20px;padding:3px 8px;font-size:9px;color:#fff;}
+/* CATEGORIES */
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;}
+.cat-card{background:#fff;border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;border:1px solid rgba(26,26,24,0.06);transition:all 0.15s;}
+.cat-card:hover{border-color:var(--ember);transform:translateY(-1px);}
+.cat-card:active{transform:scale(0.97);}
+.cat-icon{font-size:24px;margin-bottom:6px;}
+.cat-name{font-size:10px;color:#666;font-weight:500;}
+/* STATS */
+.stats-row{display:flex;gap:10px;margin-bottom:28px;}
+.stat-card{flex:1;background:#fff;border-radius:12px;padding:14px;border:1px solid rgba(26,26,24,0.06);}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--ember);}
+.stat-lbl{font-size:10px;color:#888;margin-top:2px;}
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid rgba(26,26,24,0.08);padding:8px 0 20px;display:flex;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;}
+.nav-icon{font-size:20px;}
+.nav-label{font-size:9px;color:#aaa;font-weight:500;}
+.nav-item.active .nav-icon{filter:none;}
+.nav-item.active .nav-label{color:var(--ember);}
+.nav-map-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;}
+.map-fab{width:48px;height:48px;background:var(--ember);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin-top:-24px;box-shadow:0 4px 12px rgba(232,83,26,0.4);}
+.map-fab-label{font-size:9px;color:var(--ember);font-weight:500;}
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING (first time only) -->
+<div id="onboarding">
+  <div class="ob-slides">
+    <div class="ob-slide active" id="slide-0">
+      <div class="ob-emoji">🌍</div>
+      <div class="ob-title">Welcome to Roam Wild</div>
+      <div class="ob-sub">The ultimate outdoor adventure platform. Discover incredible spots for every activity — anywhere on earth.</div>
+    </div>
+    <div class="ob-slide" id="slide-1">
+      <div class="ob-emoji">💛</div>
+      <div class="ob-title">Community Knowledge</div>
+      <div class="ob-sub">Gold fossicking creeks, secret surf breaks, wild mushroom forests, hidden hot springs. Real spots from real adventurers.</div>
+    </div>
+    <div class="ob-slide" id="slide-2">
+      <div class="ob-emoji">📍</div>
+      <div class="ob-title">Share Your Finds</div>
+      <div class="ob-sub">Found an epic spot? Add it to the map and help the community. Together we're building the world's greatest outdoor database.</div>
+    </div>
+  </div>
+  <div class="ob-bottom">
+    <div class="ob-dots">
+      <div class="ob-dot active" id="dot-0"></div>
+      <div class="ob-dot" id="dot-1"></div>
+      <div class="ob-dot" id="dot-2"></div>
+    </div>
+    <button class="ob-next" id="ob-next-btn" onclick="nextSlide()">Get Started</button>
+    <button class="ob-skip" onclick="finishOnboarding()">Skip intro</button>
+  </div>
+</div>
+
+<!-- HOME SCREEN -->
+<div id="home">
+  <div class="home-header">
+    <div class="hh-top">
+      <div class="logo-row">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+            <path d="M3 16 Q8 8 11 12 Q14 8 19 4" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="19" cy="4" r="2.5" fill="white"/>
+            <circle cx="3" cy="16" r="1.8" fill="white" opacity="0.6"/>
+          </svg>
+        </div>
+        <span class="logo-word">Roam Wild</span>
+      </div>
+      <div class="profile-btn" id="profile-btn" onclick="window.location.href='/auth'">?</div>
+    </div>
+    <div class="greeting" id="greeting">Good morning</div>
+    <div class="greeting-name" id="greeting-name">Adventurer 👋</div>
+    <div class="search-bar" onclick="window.location.href='/?search=true'">
+      <span>⌕</span>
+      <span>Search spots, activities, countries...</span>
+    </div>
+  </div>
+
+  <div class="home-body">
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-spots">227</div>
+        <div class="stat-lbl">Total spots</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">19</div>
+        <div class="stat-lbl">Categories</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">🌍</div>
+        <div class="stat-lbl">Worldwide</div>
+      </div>
+    </div>
+
+    <!-- FEATURED SPOTS -->
+    <div class="section-header">
+      <div class="section-title">Featured spots</div>
+      <div class="section-link" onclick="window.location.href='/map'">See all →</div>
+    </div>
+    <div class="featured-scroll" id="featured-scroll">
+      <div class="feat-card" style="background:#1A3A2A;" onclick="goToMap('gold')">
+        <div class="feat-bg">💛</div>
+        <div class="feat-overlay"></div>
+        <div class="feat-content">
+          <div class="feat-name">Ballarat Goldfields</div>
+          <div class="feat-loc">Victoria, Australia</div>
+        </div>
+        <div class="feat-badge">⭐ Known spot</div>
+      </div>
+      <div class="feat-card" style="background:#0A2A3A;" onclick="goToMap('surfing')">
+        <div class="feat-bg">🏄</div>
+        <div class="feat-overlay"></div>
+        <div class="feat-content">
+          <div class="feat-name">Pipeline</div>
+          <div class="feat-loc">North Shore, Hawaii</div>
+        </div>
+        <div class="feat-badge">🔥 Legendary</div>
+      </div>
+      <div class="feat-card" style="background:#2A1A3A;" onclick="goToMap('hiking')">
+        <div class="feat-bg">🥾</div>
+        <div class="feat-overlay"></div>
+        <div class="feat-content">
+          <div class="feat-name">Everest Base Camp</div>
+          <div class="feat-loc">Khumbu, Nepal</div>
+        </div>
+        <div class="feat-badge">🏔️ Bucket list</div>
+      </div>
+      <div class="feat-card" style="background:#3A1A1A;" onclick="goToMap('wellness')">
+        <div class="feat-bg">🧘</div>
+        <div class="feat-overlay"></div>
+        <div class="feat-content">
+          <div class="feat-name">Blue Lagoon</div>
+          <div class="feat-loc">Iceland</div>
+        </div>
+        <div class="feat-badge">💎 Premium</div>
+      </div>
+      <div class="feat-card" style="background:#1A2A1A;" onclick="goToMap('skydiving')">
+        <div class="feat-bg">🪂</div>
+        <div class="feat-overlay"></div>
+        <div class="feat-content">
+          <div class="feat-name">Skydive Mission Beach</div>
+          <div class="feat-loc">Far North QLD</div>
+        </div>
+        <div class="feat-badge">⚡ Epic views</div>
+      </div>
+    </div>
+
+    <br/>
+
+    <!-- CATEGORIES -->
+    <div class="section-header">
+      <div class="section-title">Explore by activity</div>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-card" onclick="goToMap('gold')"><div class="cat-icon">💛</div><div class="cat-name">Gold</div></div>
+      <div class="cat-card" onclick="goToMap('surfing')"><div class="cat-icon">🏄</div><div class="cat-name">Surfing</div></div>
+      <div class="cat-card" onclick="goToMap('hiking')"><div class="cat-icon">🥾</div><div class="cat-name">Hiking</div></div>
+      <div class="cat-card" onclick="goToMap('mtb')"><div class="cat-icon">🚵</div><div class="cat-name">MTB</div></div>
+      <div class="cat-card" onclick="goToMap('fishing')"><div class="cat-icon">🎣</div><div class="cat-name">Fishing</div></div>
+      <div class="cat-card" onclick="goToMap('climbing')"><div class="cat-icon">🧗</div><div class="cat-name">Climbing</div></div>
+      <div class="cat-card" onclick="goToMap('kayak')"><div class="cat-icon">🛶</div><div class="cat-name">Kayak</div></div>
+      <div class="cat-card" onclick="goToMap('skydiving')"><div class="cat-icon">🪂</div><div class="cat-name">Skydiving</div></div>
+      <div class="cat-card" onclick="goToMap('snowboard')"><div class="cat-icon">🏂</div><div class="cat-name">Snow</div></div>
+      <div class="cat-card" onclick="goToMap('wellness')"><div class="cat-icon">🧘</div><div class="cat-name">Wellness</div></div>
+      <div class="cat-card" onclick="goToMap('foraging')"><div class="cat-icon">🍄</div><div class="cat-name">Foraging</div></div>
+      <div class="cat-card" onclick="goToMap('fossicking')"><div class="cat-icon">💎</div><div class="cat-name">Fossicking</div></div>
+      <div class="cat-card" onclick="goToMap('lookout')"><div class="cat-icon">🏔️</div><div class="cat-name">Lookouts</div></div>
+      <div class="cat-card" onclick="goToMap('basejump')"><div class="cat-icon">🦅</div><div class="cat-name">BASE Jump</div></div>
+      <div class="cat-card" onclick="goToMap('4wd')"><div class="cat-icon">🚙</div><div class="cat-name">4WD</div></div>
+      <div class="cat-card" onclick="goToMap('gym')"><div class="cat-icon">💪</div><div class="cat-name">Gyms</div></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label" style="color:var(--ember);">Home</div>
+    </div>
+    <div class="nav-map-btn" onclick="window.location.href='/map'">
+      <div class="map-fab">🗺️</div>
+      <div class="map-fab-label">Map</div>
+    </div>
+    <div class="nav-item" onclick="window.location.href='/add'">
+      <div class="nav-icon">➕</div>
+      <div class="nav-label">Add Spot</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentSlide = 0;
+const totalSlides = 3;
+
+function nextSlide(){
+  if(currentSlide < totalSlides - 1){
+    document.getElementById(`slide-${currentSlide}`).className = 'ob-slide prev';
+    document.getElementById(`dot-${currentSlide}`).className = 'ob-dot';
+    currentSlide++;
+    document.getElementById(`slide-${currentSlide}`).className = 'ob-slide active';
+    document.getElementById(`dot-${currentSlide}`).className = 'ob-dot active';
+    if(currentSlide === totalSlides - 1){
+      document.getElementById('ob-next-btn').textContent = "Let's go! →";
+    }
+  } else {
+    finishOnboarding();
+  }
+}
+
+function finishOnboarding(){
+  localStorage.setItem('rw_onboarded', 'true');
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('home').style.display = 'block';
+  initHome();
+}
+
+function initHome(){
+  // Greeting based on time
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = greet;
+
+  // Username
+  const username = localStorage.getItem('rw_username');
+  if(username){
+    document.getElementById('greeting-name').textContent = username + ' 👋';
+    document.getElementById('profile-btn').textContent = username[0].toUpperCase();
+  }
+
+  // Load live spot count from Supabase
+  fetch('https://zqkujliskbvexoxtnjxv.supabase.co/rest/v1/spots?approved=eq.true&select=id', {
+    headers:{
+      'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxa3VqbGlza2J2ZXhveHRuanh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNjc1ODksImV4cCI6MjA5MTg0MzU4OX0.m8c50IQBVsPFLOFFRDEbhiZWy6nVGSI0qK-DWhqMmdI',
+      'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxa3VqbGlza2J2ZXhveHRuanh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNjc1ODksImV4cCI6MjA5MTg0MzU4OX0.m8c50IQBVsPFLOFFRDEbhiZWy6nVGSI0qK-DWhqMmdI',
+      'Prefer':'count=exact'
+    }
+  }).then(r=>{
+    const count = r.headers.get('content-range');
+    if(count) document.getElementById('stat-spots').textContent = count.split('/')[1] || '227';
+  }).catch(()=>{});
+}
+
+function goToMap(cat){
+  window.location.href = '/map?cat=' + cat;
+}
+
+// Boot
+window.addEventListener('load', ()=>{
+  const onboarded = localStorage.getItem('rw_onboarded');
+  if(onboarded){
+    document.getElementById('onboarding').style.display = 'none';
+    document.getElementById('home').style.display = 'block';
+    initHome();
+  }
+  // else onboarding shows by default
+});
+</script>
+</body>
+</html>

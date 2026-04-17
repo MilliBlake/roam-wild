@@ -128,7 +128,7 @@ input:focus{border-color:var(--ember);background:#fff;}
     <button class="btn-signout" onclick="signOut()">Sign Out</button>
   </div>
 
-  <a href="/" class="back-link">← Back to Roam Wild</a>
+  <a href="/home" class="back-link">← Back to Roam Wild</a>
 </div>
 
 <script>
@@ -226,7 +226,7 @@ async function signUp(){
       localStorage.setItem('rw_user', JSON.stringify(data.user));
       localStorage.setItem('rw_username', username);
       showMsg('Account created! Welcome to Roam Wild 🎉', 'success');
-      setTimeout(()=>{ window.location.href = '/?user=' + encodeURIComponent(localStorage.getItem('rw_username') || ''); }, 1000);
+      setTimeout(()=>{ window.location.href = '/home?user=' + encodeURIComponent(localStorage.getItem('rw_username') || ''); }, 1000);
     }
   } catch(err){
     showMsg(err.message);

@@ -1,9 +1,11 @@
 {
   "version": 2,
   "routes": [
+    { "src": "/", "dest": "/home.html" },
+    { "src": "/home", "dest": "/home.html" },
+    { "src": "/map", "dest": "/index.html" },
     { "src": "/auth", "dest": "/auth.html" },
     { "src": "/add", "dest": "/add_spot.html" },
-    { "src": "/", "dest": "/index.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/(.*)", "dest": "/home.html" }
   ]
 }

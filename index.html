@@ -424,15 +424,6 @@ function checkAuth(){
     document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
   }
 }
-    } catch(e){}
-    // Token expired - clear
-    localStorage.removeItem('rw_token');
-    localStorage.removeItem('rw_user');
-    localStorage.removeItem('rw_username');
-  }
-  document.getElementById('auth-btn').textContent = 'Sign In';
-  document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
-}
 
 // BOOT
 loadSpots();

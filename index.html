@@ -403,20 +403,27 @@ function toggleLegend(){
 
 // CHECK LOGIN STATE
 function checkAuth(){
-  const username = localStorage.getItem('rw_username');
-  const token = localStorage.getItem('rw_token');
-  if(username && token){
-    try {
-      // Check token not expired
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if(payload.exp * 1000 > Date.now()){
-        document.getElementById('auth-btn').textContent = '👤 ' + username;
-        document.getElementById('auth-btn').style.background = 'var(--ember)';
-        document.getElementById('auth-btn').style.color = '#fff';
-        document.getElementById('auth-btn').style.border = 'none';
-        document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
-        return;
-      }
+  // Check URL param first (just logged in)
+  const params = new URLSearchParams(window.location.search);
+  const urlUser = params.get('user');
+  if(urlUser){
+    localStorage.setItem('rw_username', urlUser);
+    // Clean URL
+    window.history.replaceState({}, '', '/');
+  }
+  
+  const username = localStorage.getItem('rw_username') || urlUser;
+  if(username){
+    document.getElementById('auth-btn').textContent = '👤 ' + username;
+    document.getElementById('auth-btn').style.background = 'var(--ember)';
+    document.getElementById('auth-btn').style.color = '#fff';
+    document.getElementById('auth-btn').style.border = 'none';
+    document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
+  } else {
+    document.getElementById('auth-btn').textContent = 'Sign In';
+    document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
+  }
+}
     } catch(e){}
     // Token expired - clear
     localStorage.removeItem('rw_token');

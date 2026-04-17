@@ -154,7 +154,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--night);color:#fff;min-hei
     <!-- FEATURED SPOTS -->
     <div class="section-header">
       <div class="section-title">Featured spots</div>
-      <div class="section-link" onclick="window.location.href='/map'">See all →</div>
+      <div class="section-link" onclick="goToMap('all')">See all →</div>
     </div>
     <div class="featured-scroll" id="featured-scroll">
       <div class="feat-card" style="background:#1A3A2A;" onclick="goToMap('gold')">
@@ -236,7 +236,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--night);color:#fff;min-hei
       <div class="nav-icon">🏠</div>
       <div class="nav-label" style="color:var(--ember);">Home</div>
     </div>
-    <div class="nav-map-btn" onclick="window.location.href='/map'">
+    <div class="nav-map-btn" onclick="goToMap('all')">
       <div class="map-fab">🗺️</div>
       <div class="map-fab-label">Map</div>
     </div>
@@ -300,7 +300,10 @@ function initHome(){
 }
 
 function goToMap(cat){
-  window.location.href = '/map?cat=' + cat;
+  const username = localStorage.getItem('rw_username');
+  let url = '/map?cat=' + cat;
+  if(username) url += '&user=' + encodeURIComponent(username);
+  window.location.href = url;
 }
 
 // Boot

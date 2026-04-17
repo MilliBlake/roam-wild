@@ -241,6 +241,16 @@ async function loadSpots(){
     document.getElementById('loading').style.display = 'none';
     initMap();
     updateStats();
+    // Apply URL cat filter after map loads
+    const urlCat = new URLSearchParams(window.location.search).get('cat');
+    if(urlCat){
+      activeFilter = urlCat;
+      document.querySelectorAll('.chip').forEach(c=>{
+        c.classList.remove('active','known-active');
+        if(c.dataset.f === urlCat) c.classList.add('active');
+      });
+    }
+    renderMarkers();
     renderList();
 
   } catch(err) {
@@ -403,31 +413,49 @@ function toggleLegend(){
 
 // CHECK LOGIN STATE
 function checkAuth(){
-  // Check URL param first (just logged in)
+  const username = localStorage.getItem('rw_username');
+  const btn = document.getElementById('auth-btn');
+  if(username){
+    btn.textContent = '👤 ' + username;
+    btn.style.background = 'var(--ember)';
+    btn.style.color = '#fff';
+    btn.style.border = 'none';
+  } else {
+    btn.textContent = 'Sign In';
+    btn.style.background = '#fff';
+    btn.style.color = 'var(--night)';
+    btn.style.border = '1px solid rgba(26,26,24,0.12)';
+  }
+  btn.onclick = ()=>window.location.href='/auth';
+}
+
+// READ URL PARAMS
+function readURLParams(){
   const params = new URLSearchParams(window.location.search);
-  const urlUser = params.get('user');
-  if(urlUser){
-    localStorage.setItem('rw_username', urlUser);
-    // Clean URL
-    window.history.replaceState({}, '', '/');
+  
+  // Category filter from home screen
+  const cat = params.get('cat');
+  if(cat){
+    activeFilter = cat;
+    document.querySelectorAll('.chip').forEach(c=>{
+      c.classList.remove('active','known-active');
+      if(c.dataset.f === cat) c.classList.add('active');
+    });
   }
   
-  const username = localStorage.getItem('rw_username') || urlUser;
-  if(username){
-    document.getElementById('auth-btn').textContent = '👤 ' + username;
-    document.getElementById('auth-btn').style.background = 'var(--ember)';
-    document.getElementById('auth-btn').style.color = '#fff';
-    document.getElementById('auth-btn').style.border = 'none';
-    document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
-  } else {
-    document.getElementById('auth-btn').textContent = 'Sign In';
-    document.getElementById('auth-btn').onclick = ()=>window.location.href='/auth';
+  // Username from login
+  const user = params.get('user');
+  if(user && user.trim()){
+    localStorage.setItem('rw_username', decodeURIComponent(user));
+    // Clean URL without reload
+    window.history.replaceState({}, '', '/map');
   }
 }
 
 // BOOT
 loadSpots();
 checkAuth();
+readURLParams();
 </script>
 </body>
 </html>

@@ -226,7 +226,7 @@ async function signUp(){
       localStorage.setItem('rw_user', JSON.stringify(data.user));
       localStorage.setItem('rw_username', username);
       showMsg('Account created! Welcome to Roam Wild 🎉', 'success');
-      setTimeout(()=>{ window.location.href = '/home?user=' + encodeURIComponent(localStorage.getItem('rw_username') || ''); }, 1000);
+      setTimeout(()=>{ window.location.href = '/home'; }, 1000);
     }
   } catch(err){
     showMsg(err.message);

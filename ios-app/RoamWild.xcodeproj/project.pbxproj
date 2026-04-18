@@ -17,14 +17,13 @@
 		E100000000000000000000E8 /* MapScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000D8 /* MapScreenView.swift */; };
 		E100000000000000000000E9 /* SpotDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000D9 /* SpotDetailView.swift */; };
 		E100000000000000000000EA /* AddSpotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DA /* AddSpotView.swift */; };
-		E100000000000000000000ED /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DD /* AuthView.swift */; };
-		E100000000000000000000EE /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DE /* AccountView.swift */; };
 		E100000000000000000000EB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DB /* Assets.xcassets */; };
 		E100000000000000000000EC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DC /* Preview Assets.xcassets */; };
+		E100000000000000000000ED /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DD /* AuthView.swift */; };
+		E100000000000000000000EE /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DE /* AccountView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		F100000000000000000000F1 /* RoamWild.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RoamWild.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D100000000000000000000D1 /* RoamWildApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamWildApp.swift; sourceTree = "<group>"; };
 		D100000000000000000000D2 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		D100000000000000000000D3 /* Spot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spot.swift; sourceTree = "<group>"; };
@@ -35,10 +34,11 @@
 		D100000000000000000000D8 /* MapScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapScreenView.swift; sourceTree = "<group>"; };
 		D100000000000000000000D9 /* SpotDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotDetailView.swift; sourceTree = "<group>"; };
 		D100000000000000000000DA /* AddSpotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSpotView.swift; sourceTree = "<group>"; };
-		D100000000000000000000DD /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
-		D100000000000000000000DE /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		D100000000000000000000DB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D100000000000000000000DC /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		D100000000000000000000DD /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		D100000000000000000000DE /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		F100000000000000000000F1 /* RoamWild.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RoamWild.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -149,7 +149,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					B100000000000000000000B1 = {
 						CreatedOnToolsVersion = 15.0;
@@ -267,6 +267,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -323,6 +324,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -336,6 +338,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"RoamWild/Preview Content\"";
+				DEVELOPMENT_TEAM = WCSMVDF29R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Roam Wild uses your location to show nearby adventure spots on the map.";
@@ -366,6 +369,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"RoamWild/Preview Content\"";
+				DEVELOPMENT_TEAM = WCSMVDF29R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Roam Wild uses your location to show nearby adventure spots on the map.";

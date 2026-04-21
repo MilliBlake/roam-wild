@@ -21,6 +21,9 @@
 		E100000000000000000000EC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DC /* Preview Assets.xcassets */; };
 		E100000000000000000000ED /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DD /* AuthView.swift */; };
 		E100000000000000000000EE /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DE /* AccountView.swift */; };
+		E100000000000000000000EF /* SavedSpotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000DF /* SavedSpotsView.swift */; };
+		E100000000000000000000F0 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000E0 /* PrivacyPolicyView.swift */; };
+		E100000000000000000000F2 /* LogoMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100000000000000000000E1 /* LogoMark.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +41,9 @@
 		D100000000000000000000DC /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		D100000000000000000000DD /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		D100000000000000000000DE /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		D100000000000000000000DF /* SavedSpotsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedSpotsView.swift; sourceTree = "<group>"; };
+		D100000000000000000000E0 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
+		D100000000000000000000E1 /* LogoMark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoMark.swift; sourceTree = "<group>"; };
 		F100000000000000000000F1 /* RoamWild.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RoamWild.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -109,6 +115,9 @@
 				D100000000000000000000DA /* AddSpotView.swift */,
 				D100000000000000000000DD /* AuthView.swift */,
 				D100000000000000000000DE /* AccountView.swift */,
+				D100000000000000000000DF /* SavedSpotsView.swift */,
+				D100000000000000000000E0 /* PrivacyPolicyView.swift */,
+				D100000000000000000000E1 /* LogoMark.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -203,6 +212,9 @@
 				E100000000000000000000EA /* AddSpotView.swift in Sources */,
 				E100000000000000000000ED /* AuthView.swift in Sources */,
 				E100000000000000000000EE /* AccountView.swift in Sources */,
+				E100000000000000000000EF /* SavedSpotsView.swift in Sources */,
+				E100000000000000000000F0 /* PrivacyPolicyView.swift in Sources */,
+				E100000000000000000000F2 /* LogoMark.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,10 +353,13 @@
 				DEVELOPMENT_TEAM = WCSMVDF29R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Roam Wild";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Roam Wild uses your location to show nearby adventure spots on the map.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				"INFOPLIST_KEY_UILaunchScreen_BackgroundColor" = LaunchBackground;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -372,10 +387,13 @@
 				DEVELOPMENT_TEAM = WCSMVDF29R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Roam Wild";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Roam Wild uses your location to show nearby adventure spots on the map.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				"INFOPLIST_KEY_UILaunchScreen_BackgroundColor" = LaunchBackground;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;

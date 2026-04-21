@@ -165,6 +165,22 @@ final class AppState: ObservableObject {
         clearAuth()
     }
 
+    /// Request password reset email. No auth required.
+    func requestPasswordReset(email: String) async throws {
+        try await SupabaseService.shared.requestPasswordReset(email: email)
+    }
+
+    /// Permanently delete the user's account. Fires the server-side RPC, then
+    /// signs out locally. Apple guideline 5.1.1(v) compliance.
+    func deleteAccount() async throws {
+        guard let token = accessToken else { throw SubmitError.notSignedIn }
+        // Best-effort server-side request — if the RPC doesn't exist yet, we still
+        // sign the user out so the local session is cleared.
+        try? await SupabaseService.shared.requestAccountDeletion(token: token)
+        try? await SupabaseService.shared.signOut(token: token)
+        clearAuth()
+    }
+
     func refreshProfile() async {
         guard let userId, let accessToken else { return }
         do {

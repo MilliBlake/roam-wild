@@ -53,15 +53,8 @@ struct AuthView: View {
     private var header: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Brand.ember)
-                    .frame(width: 52, height: 52)
-                    .overlay(
-                        Image(systemName: "location.north.line.fill")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.white)
-                    )
-                Text("ROAM WILD")
+                RoamWildLogoBadge(size: 52, cornerRadius: 14)
+                Text("Roam Wild")
                     .font(.system(size: 42, weight: .heavy))
                     .kerning(2)
                     .foregroundColor(.white)
@@ -133,6 +126,14 @@ struct AuthView: View {
             labeled("PASSWORD") {
                 SecureField("••••••••", text: $siPassword)
                     .textContentType(.password)
+            }
+            HStack {
+                Spacer()
+                Button("Forgot password?") {
+                    Task { await doResetPassword() }
+                }
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(Brand.ember)
             }
             primaryButton(title: isBusy ? "Signing in..." : "Sign In  →") {
                 Task { await doSignIn() }
@@ -237,6 +238,21 @@ struct AuthView: View {
     }
 
     // MARK: - Actions
+
+    private func doResetPassword() async {
+        let email = siEmail.trimmingCharacters(in: .whitespaces)
+        guard !email.isEmpty else {
+            message = .error("Enter your email above, then tap 'Forgot password?' again.")
+            return
+        }
+        isBusy = true; defer { isBusy = false }
+        do {
+            try await appState.requestPasswordReset(email: email)
+            message = .success("Check your inbox — we've sent a reset link to \(email).")
+        } catch {
+            message = .error(error.localizedDescription)
+        }
+    }
 
     private func doSignIn() async {
         guard !siEmail.isEmpty, !siPassword.isEmpty else {

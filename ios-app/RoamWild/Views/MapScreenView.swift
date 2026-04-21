@@ -105,15 +105,8 @@ struct MapScreenView: View {
     private var topBar: some View {
         HStack(spacing: 10) {
             HStack(spacing: 8) {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Brand.ember)
-                    .frame(width: 28, height: 28)
-                    .overlay(
-                        Image(systemName: "location.north.line.fill")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.white)
-                    )
-                Text("ROAM WILD")
+                RoamWildLogoBadge(size: 28, cornerRadius: 8)
+                Text("Roam Wild")
                     .font(.system(size: 16, weight: .heavy))
                     .kerning(0.8)
                     .foregroundColor(Brand.night)
@@ -144,9 +137,17 @@ struct MapScreenView: View {
                         .fill(Brand.ember)
                         .frame(width: 28, height: 28)
                         .overlay(
-                            Text(mapProfileInitial)
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.white)
+                            Group {
+                                if let letter = mapProfileInitial {
+                                    Text(letter)
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(.white)
+                                } else {
+                                    Image(systemName: "person.fill")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(.white)
+                                }
+                            }
                         )
                 } else {
                     Text("Sign In")
@@ -165,11 +166,11 @@ struct MapScreenView: View {
         .background(Color.white.shadow(color: .black.opacity(0.05), radius: 4, y: 2))
     }
 
-    private var mapProfileInitial: String {
+    private var mapProfileInitial: String? {
         if let n = appState.username, let first = n.first {
             return String(first).uppercased()
         }
-        return "?"
+        return nil
     }
 
     private var statsBar: some View {

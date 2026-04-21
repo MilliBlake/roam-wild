@@ -262,6 +262,27 @@ actor SupabaseService {
         _ = try await post(path: "/auth/v1/logout", body: EmptyBody(), authToken: token)
     }
 
+    /// Send a password-reset email. Supabase emails a recovery link to the user.
+    func requestPasswordReset(email: String) async throws {
+        struct Body: Encodable { let email: String }
+        _ = try await post(path: "/auth/v1/recover", body: Body(email: email), authToken: nil)
+    }
+
+    /// Kick off account deletion. Calls a Supabase RPC named `request_account_deletion`
+    /// (an edge function / SQL function you deploy with service_role) that schedules
+    /// the auth user + their rows for hard-delete within 30 days. On the client we
+    /// just fire-and-forget, then sign out.
+    ///
+    /// Apple guideline 5.1.1(v) requires the deletion to be *initiatable* from the
+    /// app; the actual purge can be async on the backend.
+    func requestAccountDeletion(token: String) async throws {
+        _ = try await post(
+            path: "/rest/v1/rpc/request_account_deletion",
+            body: EmptyBody(),
+            authToken: token
+        )
+    }
+
     // MARK: Profile
 
     /// Fetch the authenticated user's profile row.

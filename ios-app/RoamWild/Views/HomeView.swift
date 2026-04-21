@@ -32,8 +32,14 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: 0) {
                 headerSection
+                if let err = appState.loadError {
+                    errorBanner(err)
+                }
                 contentSection
             }
+        }
+        .refreshable {
+            await appState.loadSpots()
         }
         .background(Brand.canvas)
         .ignoresSafeArea(edges: .top)
@@ -46,6 +52,37 @@ struct HomeView: View {
         }
     }
 
+    private func errorBanner(_ message: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundColor(Brand.ember)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Couldn't load spots")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Brand.night)
+                Text(message)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+            Spacer()
+            Button("Retry") {
+                Task { await appState.loadSpots() }
+            }
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundColor(Brand.ember)
+        }
+        .padding(12)
+        .background(Color(red: 0.99, green: 0.92, blue: 0.85))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Brand.ember.opacity(0.25), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+    }
+
     // MARK: - Sections
 
     private var headerSection: some View {
@@ -55,15 +92,8 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     HStack(spacing: 10) {
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Brand.ember)
-                            .frame(width: 36, height: 36)
-                            .overlay(
-                                Image(systemName: "location.north.line.fill")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 16, weight: .bold))
-                            )
-                        Text("ROAM WILD")
+                        RoamWildLogoBadge(size: 36)
+                        Text("Roam Wild")
                             .font(.system(size: 22, weight: .heavy, design: .default))
                             .kerning(1.2)
                             .foregroundColor(.white)
@@ -76,9 +106,17 @@ struct HomeView: View {
                             .fill(Brand.ember)
                             .frame(width: 36, height: 36)
                             .overlay(
-                                Text(profileInitial)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.white)
+                                Group {
+                                    if let letter = profileInitial {
+                                        Text(letter)
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(.white)
+                                    } else {
+                                        Image(systemName: "person.fill")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(.white)
+                                    }
+                                }
                             )
                             .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 2))
                     }
@@ -257,11 +295,11 @@ struct HomeView: View {
         return "Good evening"
     }
 
-    private var profileInitial: String {
+    private var profileInitial: String? {
         if let n = appState.username, let first = n.first {
             return String(first).uppercased()
         }
-        return "?"
+        return nil
     }
 }
 

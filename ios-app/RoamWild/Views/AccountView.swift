@@ -2,7 +2,7 @@
 //  AccountView.swift
 //  RoamWild
 //
-//  Mirror of the user-panel block in auth.html — avatar, stats, actions.
+//  User panel — avatar, stats, saved spots, feedback, sign out, delete.
 //
 
 import SwiftUI
@@ -12,6 +12,11 @@ struct AccountView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var isSigningOut = false
+    @State private var isDeleting = false
+    @State private var showDeleteConfirm = false
+    @State private var deleteError: String?
+    @State private var showSavedSpots = false
+    @State private var showPrivacy = false
 
     var body: some View {
         ZStack {
@@ -22,6 +27,7 @@ struct AccountView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     panel
+                    footer
                     Button {
                         dismiss()
                     } label: {
@@ -30,7 +36,7 @@ struct AccountView: View {
                             .foregroundColor(Color.white.opacity(0.6))
                     }
                     .buttonStyle(.plain)
-                    .padding(.top, 8)
+                    .padding(.top, 4)
                 }
                 .padding(.vertical, 40)
                 .padding(.horizontal, 20)
@@ -38,6 +44,20 @@ struct AccountView: View {
         }
         .task {
             await appState.refreshProfile()
+        }
+        .sheet(isPresented: $showSavedSpots) {
+            SavedSpotsView()
+        }
+        .sheet(isPresented: $showPrivacy) {
+            PrivacyPolicyView()
+        }
+        .alert("Delete your Roam Wild account?", isPresented: $showDeleteConfirm) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                Task { await performDelete() }
+            }
+        } message: {
+            Text("This removes your profile, saved spots, and submissions. It can't be undone.")
         }
     }
 
@@ -67,6 +87,14 @@ struct AccountView: View {
 
             VStack(spacing: 10) {
                 Button {
+                    showSavedSpots = true
+                } label: {
+                    actionLabel("Saved spots", systemImage: "heart.fill",
+                                badge: appState.savedCount > 0 ? "\(appState.savedCount)" : nil)
+                }
+                .buttonStyle(.plain)
+
+                Button {
                     dismiss()
                 } label: {
                     actionLabel("Explore the map", systemImage: "map")
@@ -78,6 +106,13 @@ struct AccountView: View {
                         actionLabel("Send feedback", systemImage: "envelope")
                     }
                 }
+
+                Button {
+                    showPrivacy = true
+                } label: {
+                    actionLabel("Privacy policy", systemImage: "lock.shield")
+                }
+                .buttonStyle(.plain)
 
                 Button {
                     Task {
@@ -96,7 +131,29 @@ struct AccountView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
                 .buttonStyle(.plain)
-                .disabled(isSigningOut)
+                .disabled(isSigningOut || isDeleting)
+
+                Button {
+                    showDeleteConfirm = true
+                } label: {
+                    HStack(spacing: 6) {
+                        if isDeleting { ProgressView().scaleEffect(0.7) }
+                        Text(isDeleting ? "Deleting..." : "Delete Account")
+                            .font(.system(size: 12, weight: .medium))
+                    }
+                    .foregroundColor(.red.opacity(0.8))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+                .disabled(isDeleting || isSigningOut)
+
+                if let err = deleteError {
+                    Text(err)
+                        .font(.system(size: 11))
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                }
             }
         }
         .padding(28)
@@ -139,7 +196,7 @@ struct AccountView: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
-    private func actionLabel(_ title: String, systemImage: String) -> some View {
+    private func actionLabel(_ title: String, systemImage: String, badge: String? = nil) -> some View {
         HStack(spacing: 8) {
             Image(systemName: systemImage)
                 .font(.system(size: 13, weight: .medium))
@@ -147,7 +204,17 @@ struct AccountView: View {
             Text(title)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(Brand.night)
+            Spacer()
+            if let badge {
+                Text(badge)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8).padding(.vertical, 2)
+                    .background(Brand.ember)
+                    .clipShape(Capsule())
+            }
         }
+        .padding(.horizontal, 14)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 11)
         .background(Color.white)
@@ -155,6 +222,17 @@ struct AccountView: View {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(Color.black.opacity(0.12), lineWidth: 1)
         )
+    }
+
+    private var footer: some View {
+        VStack(spacing: 2) {
+            Text("Roam Wild")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(Color.white.opacity(0.4))
+            Text(versionString)
+                .font(.system(size: 10))
+                .foregroundColor(Color.white.opacity(0.3))
+        }
     }
 
     // MARK: - Helpers
@@ -168,7 +246,26 @@ struct AccountView: View {
 
     private var initial: String {
         if let first = displayName.first { return String(first).uppercased() }
-        return "🧭"
+        return "R"
+    }
+
+    private var versionString: String {
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        return "v\(v) • build \(b)"
+    }
+
+    private func performDelete() async {
+        deleteError = nil
+        isDeleting = true
+        do {
+            try await appState.deleteAccount()
+            isDeleting = false
+            dismiss()
+        } catch {
+            deleteError = error.localizedDescription
+            isDeleting = false
+        }
     }
 }
 
